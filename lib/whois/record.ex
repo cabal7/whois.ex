@@ -62,7 +62,15 @@ defmodule Whois.Record do
               "domain name" ->
                 %{record | domain: value}
 
+              #icelandic return
+              "domain" ->
+                %{record | domain: value}
+
               "name server" ->
+                %{record | nameservers: record.nameservers ++ [value]}
+
+              #icelandic return
+              "nserver" ->
                 %{record | nameservers: record.nameservers ++ [value]}
 
               "registrar" ->
@@ -77,11 +85,19 @@ defmodule Whois.Record do
               "creation date" ->
                 %{record | created_at: parse_dt(value) || record.created_at}
 
+              #icelandic return
+              "created" ->
+                %{record | created_at: parse_dt_is(value) || record.created_at}
+
               "updated date" ->
                 %{record | updated_at: parse_dt(value) || record.updated_at}
 
+
               "expiration date" ->
                 %{record | expires_at: parse_dt(value) || record.expires_at}
+
+              "expires" ->
+                %{record | expires_at: parse_dt_is(value) || record.expires_at}
 
               "registry expiry date" ->
                 %{record | expires_at: parse_dt(value) || record.expires_at}
@@ -118,6 +134,35 @@ defmodule Whois.Record do
       {:error, _} -> nil
     end
   end
+
+  defp parse_dt_is(string) do
+    String.split(string, " ", trim: true)
+    |> parse_month_is()
+  end
+
+  defp parse_month_is(["January", day, year]), do: "#{year}-01-#{fix_day(day)}T00:00:00" |> NaiveDateTime.from_iso8601!()
+  defp parse_month_is(["February", day, year]), do: "#{year}-02-#{fix_day(day)}T00:00:00" |> NaiveDateTime.from_iso8601!()
+  defp parse_month_is(["March", day, year]), do: "#{year}-03-#{fix_day(day)}T00:00:00" |> NaiveDateTime.from_iso8601!()
+  defp parse_month_is(["April", day, year]), do: "#{year}-04-#{fix_day(day)}T00:00:00" |> NaiveDateTime.from_iso8601!()
+  defp parse_month_is(["May", day, year]), do: "#{year}-05-#{fix_day(day)}T00:00:00" |> NaiveDateTime.from_iso8601!()
+  defp parse_month_is(["June", day, year]), do: "#{year}-06-#{fix_day(day)}T00:00:00" |> NaiveDateTime.from_iso8601!()
+  defp parse_month_is(["July", day, year]), do: "#{year}-07-#{fix_day(day)}T00:00:00" |> NaiveDateTime.from_iso8601!()
+  defp parse_month_is(["August", day, year]), do: "#{year}-08-#{fix_day(day)}T00:00:00" |> NaiveDateTime.from_iso8601!()
+  defp parse_month_is(["September", day, year]), do: "#{year}-09-#{fix_day(day)}T00:00:00" |> NaiveDateTime.from_iso8601!()
+  defp parse_month_is(["October", day, year]), do: "#{year}-10-#{fix_day(day)}T00:00:00" |> NaiveDateTime.from_iso8601!()
+  defp parse_month_is(["November", day, year]), do: "#{year}-11-#{fix_day(day)}T00:00:00" |> NaiveDateTime.from_iso8601!()
+  defp parse_month_is(["December", day, year]), do: "#{year}-12-#{fix_day(day)}T00:00:00" |> NaiveDateTime.from_iso8601!()
+
+  defp fix_day("1"), do: "01"
+  defp fix_day("2"), do: "02"
+  defp fix_day("3"), do: "03"
+  defp fix_day("4"), do: "04"
+  defp fix_day("5"), do: "05"
+  defp fix_day("6"), do: "06"
+  defp fix_day("7"), do: "07"
+  defp fix_day("8"), do: "08"
+  defp fix_day("9"), do: "09"
+  defp fix_day(day), do: day
 
   defp parse_contact(%Contact{} = contact, name, value) do
     key =

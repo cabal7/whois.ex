@@ -6,6 +6,8 @@ defmodule Whois.Record do
     :raw,
     :nameservers,
     :registrar,
+    :domain_status,
+    :unlocked?,
     :created_at,
     :updated_at,
     :expires_at,
@@ -17,6 +19,8 @@ defmodule Whois.Record do
           raw: String.t(),
           nameservers: [String.t()],
           registrar: String.t(),
+          domain_status: String.t(),
+          unlocked?: bool(),
           created_at: NaiveDateTime.t(),
           updated_at: NaiveDateTime.t(),
           expires_at: NaiveDateTime.t(),
@@ -66,6 +70,9 @@ defmodule Whois.Record do
 
               "sponsoring registrar" ->
                 %{record | registrar: value}
+
+              "domain status" ->
+                %{record | domain_status: value, unlocked?: unlocked?(value)}
 
               "creation date" ->
                 %{record | created_at: parse_dt(value) || record.created_at}
@@ -134,6 +141,9 @@ defmodule Whois.Record do
       contact
     end
   end
+  # https://www.icann.org/en/system/files/files/epp-status-codes-30jun11-en.pdf
+  defp unlocked?("ok" <> _), do: true
+  defp unlocked?(_), do: false
 end
 
 defimpl Inspect, for: Whois.Record do
